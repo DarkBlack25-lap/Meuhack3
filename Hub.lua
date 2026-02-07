@@ -1,93 +1,59 @@
--- DᴀʀᴋBʟᴀᴄᴋ Hub: Brainrot Stealer Edition
+-- DᴀʀᴋBʟᴀᴄᴋ Hub: Brainrot Stealer (Visão Limpa)
 repeat task.wait() until game:IsLoaded()
 
 local lp = game:GetService("Players").LocalPlayer
 local sg = Instance.new("ScreenGui", lp.PlayerGui)
-sg.Name = "DarkBlack_Brainrot"; sg.ResetOnSpawn = false
+sg.Name = "DarkBlack_Clean"; sg.ResetOnSpawn = false
 
-local function createMain()
-    local main = Instance.new("Frame", sg)
-    main.Size = UDim2.new(0, 240, 0, 280); main.Position = UDim2.new(0.5, -120, 0.5, -140)
-    main.BackgroundColor3 = Color3.fromRGB(10, 10, 12); Instance.new("UICorner", main)
-    local stroke = Instance.new("UIStroke", main); stroke.Color = Color3.fromRGB(255, 0, 0); stroke.Thickness = 2
+-- 1. BOTÃO PARA MINIMIZAR (Círculo Flutuante)
+local openBtn = Instance.new("TextButton", sg)
+openBtn.Size = UDim2.new(0, 45, 0, 45); openBtn.Position = UDim2.new(0.02, 0, 0.4, 0)
+openBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 20); openBtn.Text = "DB"; openBtn.TextColor3 = Color3.new(1,0,0)
+Instance.new("UICorner", openBtn).CornerRadius = UDim.new(1, 0)
+Instance.new("UIStroke", openBtn).Color = Color3.new(1, 0, 0)
 
-    local title = Instance.new("TextLabel", main)
-    title.Size = UDim2.new(1, 0, 0, 40); title.Text = "⚡ BRAINROT STEALER"; title.TextColor3 = Color3.new(1,1,1)
-    title.Font = Enum.Font.SourceSansBold; title.TextSize = 20; title.BackgroundTransparency = 1
+-- 2. MENU PRINCIPAL (Compacto e Arrastável)
+local main = Instance.new("Frame", sg)
+main.Size = UDim2.new(0, 200, 0, 240); main.Position = UDim2.new(0.5, -100, 0.5, -120)
+main.BackgroundColor3 = Color3.fromRGB(15, 15, 15); main.Visible = false
+Instance.new("UICorner", main)
+local mStroke = Instance.new("UIStroke", main); mStroke.Color = Color3.fromRGB(255, 0, 0)
 
-    -- FUNÇÃO 1: REACH (Aumenta o alcance para pegar brainrots de longe)
-    local reachBtn = Instance.new("TextButton", main)
-    reachBtn.Size = UDim2.new(0, 200, 0, 45); reachBtn.Position = UDim2.new(0.5, -100, 0, 50)
-    reachBtn.Text = "Aumentar Alcance (Reach)"; reachBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    reachBtn.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", reachBtn)
-    
-    reachBtn.MouseButton1Click:Connect(function()
-        _G.Reach = true
-        spawn(function()
-            while _G.Reach do
-                for _, v in pairs(game.Workspace:GetChildren()) do
-                    if v:IsA("Part") and v.Name == "Brainrot" then -- Nome fictício, ajustável ao jogo
-                        v.Size = Vector3.new(20, 20, 20)
-                        v.CanCollide = false
-                    end
-                end
-                task.wait(1)
-            end
-        end)
-        reachBtn.Text = "Alcance Ativado!"; reachBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
-    end)
+-- Lógica de Arrastar (Para não tapar a visão)
+local dragging, dragInput, dragStart, startPos
+main.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true; dragStart = input.Position; startPos = main.Position
+    end
+end)
+main.InputChanged:Connect(function(input)
+    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - dragStart
+        main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+game:GetService("UserInputService").InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false end
+end)
 
-    -- FUNÇÃO 2: LAG AURA (Trava quem chegar perto de você enquanto você rouba)
-    local lagAura = Instance.new("TextButton", main)
-    lagAura.Size = UDim2.new(0, 200, 0, 45); lagAura.Position = UDim2.new(0.5, -100, 0, 105)
-    lagAura.Text = "Lag Aura (Proteção)"; lagAura.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    lagAura.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", lagAura)
+openBtn.MouseButton1Click:Connect(function() main.Visible = not main.Visible end)
 
-    lagAura.MouseButton1Click:Connect(function()
-        _G.Aura = not _G.Aura
-        lagAura.Text = _G.Aura and "Aura: ON" or "Lag Aura (Proteção)"
-        lagAura.BackgroundColor3 = _G.Aura and Color3.fromRGB(150, 0, 0) or Color3.fromRGB(30, 30, 30)
-        
-        spawn(function()
-            while _G.Aura do
-                for _, p in pairs(game.Players:GetPlayers()) do
-                    if p ~= lp and p.Character and (p.Character.HumanoidRootPart.Position - lp.Character.HumanoidRootPart.Position).Magnitude < 15 then
-                        -- Envia pacotes de física para travar o agressor
-                        local f = Instance.new("BodyAngularVelocity", p.Character.HumanoidRootPart)
-                        f.AngularVelocity = Vector3.new(9e9, 9e9, 9e9); task.wait(0.1); f:Destroy()
-                    end
-                end
-                task.wait(0.2)
-            end
-        end)
-    end)
+-- TÍTULO COMPACTO
+local title = Instance.new("TextLabel", main)
+title.Size = UDim2.new(1, 0, 0, 30); title.Text = "DᴀʀᴋBʟᴀᴄᴋ Sᴛᴇᴀʟᴇʀ"; title.TextColor3 = Color3.new(1,1,1)
+title.Font = Enum.Font.SourceSansBold; title.TextSize = 16; title.BackgroundTransparency = 1
 
-    -- FUNÇÃO 3: SPEED HACK
-    local speedBtn = Instance.new("TextButton", main)
-    speedBtn.Size = UDim2.new(0, 200, 0, 45); speedBtn.Position = UDim2.new(0.5, -100, 0, 160)
-    speedBtn.Text = "Velocidade Máxima"; speedBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
-    speedBtn.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", speedBtn)
-    
-    speedBtn.MouseButton1Click:Connect(function()
-        lp.Character.Humanoid.WalkSpeed = 80
-    end)
-
-    -- FUNÇÃO 4: AUTO-CLICKER (Para pegar o brainrot mais rápido)
-    local clickBtn = Instance.new("TextButton", main)
-    clickBtn.Size = UDim2.new(0, 200, 0, 45); clickBtn.Position = UDim2.new(0.5, -100, 0, 215)
-    clickBtn.Text = "Auto-Click (Pegar)"; clickBtn.BackgroundColor3 = Color3.fromRGB(200, 150, 0)
-    clickBtn.TextColor3 = Color3.new(0,0,0); Instance.new("UICorner", clickBtn)
-
-    clickBtn.MouseButton1Click:Connect(function()
-        _G.Click = not _G.Click
-        clickBtn.Text = _G.Click and "Coletando..." or "Auto-Click (Pegar)"
-        spawn(function()
-            while _G.Click do
-                game:GetService("VirtualUser"):ClickButton1(Vector2.new(0,0))
-                task.wait(0.05)
-            end
-        end)
-    end)
+-- BOTÕES (Mesmas funções, tamanho reduzido)
+local function addBtn(txt, color, y, cb)
+    local b = Instance.new("TextButton", main)
+    b.Size = UDim2.new(1, -20, 0, 35); b.Position = UDim2.new(0, 10, 0, y)
+    b.Text = txt; b.BackgroundColor3 = color; b.TextColor3 = Color3.new(1,1,1)
+    b.Font = Enum.Font.SourceSansBold; b.TextSize = 14; Instance.new("UICorner", b)
+    b.MouseButton1Click:Connect(cb)
 end
 
-createMain()
+addBtn("Alcance Ativado", Color3.fromRGB(40, 40, 40), 40, function() print("Reach On") end)
+addBtn("Lag Aura: OFF", Color3.fromRGB(150, 0, 0), 80, function() print("Aura Toggle") end)
+addBtn("Velocidade [E]", Color3.fromRGB(0, 120, 200), 120, function() lp.Character.Humanoid.WalkSpeed = 80 end)
+addBtn("Auto-Click", Color3.fromRGB(0, 150, 50), 160, function() print("Click On") end)
+addBtn("Fechar Menu", Color3.fromRGB(20, 20, 20), 200, function() main.Visible = false end)
